@@ -1,7 +1,7 @@
 # Проект «Большое путешествие» [![Build status][travis-image]][travis-url]
 
 * Студент: [Антон Ромичев](https://up.htmlacademy.ru/ecmascript/13/user/33979).
-* Наставник: `Неизвестно`.
+* Наставник: [Ruslan Malogulko](https://htmlacademy.ru/profile/id9728).
 
 ---
 
