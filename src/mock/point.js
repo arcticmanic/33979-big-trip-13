@@ -6,7 +6,8 @@ const MIN_OFFERS_COUNT = 0;
 const MAX_OFFERS_COUNT = 5;
 const MIN_PRICE = 10;
 const MAX_PRICE = 10000;
-const OFFER_TITLES = [`Add luggage`, `Switch to comfort`, `Add meal`, `Choose seats`, `Travel by train`, `Rent a car`, `Order Uber`, `Add breakfast`];
+const MIN_PHOTOS_COUNT = 1;
+const MAX_PHOTOS_COUNT = 6;
 const OFFER_PRICES = [20, 30, 40, 50, 10];
 const DESCRIPTIONS = [
   `Lorem ipsum dolor sit amet, consectetur adipiscing elit.`,
@@ -41,6 +42,16 @@ const getRandomArrayElement = (arr) => {
   return arr[randomIndex];
 };
 
+const generatePhotos = (count) => {
+  const photos = [];
+  let photoPath = ``;
+  for (let i = 0; i < count; i++) {
+    photoPath = `http://picsum.photos/248/152?r=${Math.random()}`;
+    photos.push(photoPath);
+  }
+  return photos;
+};
+
 const getRandomDate = () => {
   const minYear = 2019;
   const maxYear = 2021;
@@ -53,15 +64,18 @@ const getRandomDate = () => {
   return dayjs(date);
 };
 
-const generateOffers = (count) => {
+const generateOffers = () => {
   const offers = [];
-  for (let i = 0; i < count; i++) {
-    offers.push({
-      type: getRandomArrayElement(POINT_TYPES),
-      title: OFFER_TITLES[getRandomInt(0, OFFER_TITLES.length - 1)],
-      price: OFFER_PRICES[getRandomInt(0, OFFER_PRICES.length - 1)]
-    });
-  }
+  POINT_TYPES.forEach((pointType) => {
+    const offersCount = getRandomInt(MIN_OFFERS_COUNT, MAX_OFFERS_COUNT);
+    for (let i = 0; i < offersCount; i++) {
+      offers.push({
+        type: pointType,
+        title: `${pointType} offer ${i}`,
+        price: OFFER_PRICES[getRandomInt(0, OFFER_PRICES.length - 1)]
+      });
+    }
+  });
   return offers;
 };
 
@@ -71,14 +85,15 @@ const generatePoint = () => {
     .add(getRandomInt(1, 12), `hour`)
     .add(getRandomInt(0, 59), `minute`)
     .add(getRandomInt(0, 59), `second`);
+  const pointType = getRandomArrayElement(POINT_TYPES);
 
   return {
-    type: getRandomArrayElement(POINT_TYPES),
+    type: pointType,
     destination: getRandomArrayElement(DESTINATIONS),
-    offers: generateOffers(getRandomInt(MIN_OFFERS_COUNT, MAX_OFFERS_COUNT)),
+    offers: OFFERS.filter((offer) => offer.type === pointType),
     info: {
       description: getRandomArrayElement(DESCRIPTIONS),
-      photo: `http://picsum.photos/248/152?r=${Math.random()}`
+      photos: generatePhotos(getRandomInt(MIN_PHOTOS_COUNT, MAX_PHOTOS_COUNT))
     },
     price: getRandomInt(MIN_PRICE, MAX_PRICE),
     startTime,
@@ -87,4 +102,6 @@ const generatePoint = () => {
   };
 };
 
-export {generatePoint};
+let OFFERS = generateOffers();
+
+export {generatePoint, DESTINATIONS, OFFERS};

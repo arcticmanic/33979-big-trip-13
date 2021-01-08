@@ -1,3 +1,5 @@
+import {createElement} from "../utils.js";
+
 const createNewPointTemplate = () => {
   return `
     <li class="trip-events__item">
@@ -148,4 +150,24 @@ const createNewPointTemplate = () => {
   `;
 };
 
-export {createNewPointTemplate};
+export default class TripNewPoint {
+  constructor() {
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createNewPointTemplate();
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}
