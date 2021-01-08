@@ -1,36 +1,78 @@
-import {createTripInfoTemplate} from "./view/trip-info.js";
-import {createTripMenuTemplate} from "./view/trip-menu.js";
-import {createTripFiltersTemplate} from "./view/trip-filters.js";
-import {createTripSortTemplate} from "./view/trip-sort.js";
-import {createTripListTemplate} from "./view/trip-list.js";
-import {createEditPointTemplate} from "./view/trip-edit-point.js";
-import {createNewPointTemplate} from "./view/trip-new-point.js";
-import {createTripPointTemplate} from "./view/trip-point.js";
+import TripInfoView from "./view/trip-info.js";
+import TripMenuView from "./view/trip-menu.js";
+import TripFiltersView from "./view/trip-filters.js";
+import TripSortView from "./view/trip-sort.js";
+import TripListView from "./view/trip-list.js";
+import TripEditPointView from "./view/trip-edit-point.js";
+import TripNewPointView from "./view/trip-new-point.js";
+import TripPointView from "./view/trip-point.js";
 import {generatePoint} from "./mock/point.js";
-
-const render = (container, template, place) => {
-  container.insertAdjacentHTML(place, template);
-};
+import {render, RenderPosition} from "./utils.js";
 
 const POINT_COUNT = 20;
 
 const points = new Array(POINT_COUNT).fill().map(generatePoint);
+points.sort((a, b) => {
+  if (a.startTime.isBefore(b.startTime)) {
+    return -1;
+  }
+  if (a.startTime.isAfter(b.startTime)) {
+    return 1;
+  }
+  return 0;
+});
+
+const renderPoint = (pointListElement, point) => {
+  const pointComponent = new TripPointView(point);
+  const pointEditComponent = new TripEditPointView(point);
+
+  const onEscKeyDown = (evt) => {
+    if (evt.key === `Escape` || evt.key === `Esc`) {
+      evt.preventDefault();
+      replaceFormToCard();
+      document.removeEventListener(`keydown`, onEscKeyDown);
+    }
+  };
+
+  const replaceCardToForm = () => {
+    pointListElement.replaceChild(pointEditComponent.getElement(), pointComponent.getElement());
+  };
+
+  const replaceFormToCard = () => {
+    pointListElement.replaceChild(pointComponent.getElement(), pointEditComponent.getElement());
+  };
+
+  pointComponent.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, () => {
+    replaceCardToForm();
+    document.addEventListener(`keydown`, onEscKeyDown);
+  });
+
+  pointEditComponent.getElement().querySelector(`form`).addEventListener(`submit`, (evt) => {
+    evt.preventDefault();
+    replaceFormToCard();
+    document.removeEventListener(`keydown`, onEscKeyDown);
+  });
+
+  pointEditComponent.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, () => {
+    replaceFormToCard();
+  });
+
+  render(pointListElement, pointComponent.getElement(), RenderPosition.BEFOREEND);
+};
 
 const tripMainContainer = document.querySelector(`.trip-main`);
-const tripControlsContainer = tripMainContainer.querySelector(`.trip-main__trip-controls`);
+const tripMenuContainer = tripMainContainer.querySelector(`.trip-main__trip-controls`);
 const tripEventsSection = document.querySelector(`.trip-events`);
 
-render(tripMainContainer, createTripInfoTemplate(), `afterbegin`);
-render(tripControlsContainer, createTripMenuTemplate(), `afterbegin`);
-render(tripControlsContainer, createTripFiltersTemplate(), `beforeend`);
-render(tripEventsSection, createTripSortTemplate(), `afterbegin`);
-render(tripEventsSection, createTripListTemplate(), `beforeend`);
+render(tripMainContainer, new TripInfoView(points).getElement(), RenderPosition.AFTERBEGIN);
+render(tripMenuContainer, new TripMenuView().getElement(), RenderPosition.AFTERBEGIN);
+render(tripMenuContainer, new TripFiltersView().getElement(), RenderPosition.BEFOREEND);
+render(tripEventsSection, new TripSortView().getElement(), RenderPosition.AFTERBEGIN);
 
-const tripList = tripEventsSection.querySelector(`.trip-events__list`);
+const tripListComponent = new TripListView();
+render(tripEventsSection, tripListComponent.getElement(), RenderPosition.BEFOREEND);
+render(tripListComponent.getElement(), new TripNewPointView().getElement(), RenderPosition.BEFOREEND);
 
-render(tripList, createEditPointTemplate(points[0]), `afterbegin`);
-render(tripList, createNewPointTemplate(), `beforeend`);
-
-for (let i = 1; i < POINT_COUNT; i++) {
-  render(tripList, createTripPointTemplate(points[i]), `beforeend`);
+for (let i = 0; i < POINT_COUNT; i++) {
+  renderPoint(tripListComponent.getElement(), points[i]);
 }
