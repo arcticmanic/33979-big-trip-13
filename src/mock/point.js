@@ -86,11 +86,19 @@ const generatePoint = () => {
     .add(getRandomInt(0, 59), `minute`)
     .add(getRandomInt(0, 59), `second`);
   const pointType = getRandomArrayElement(POINT_TYPES);
+  const availableOffers = OFFERS.filter((offer) => offer.type === pointType);
+  let selectedOffers = [];
+  availableOffers.forEach((offer) => {
+    const isSelected = Boolean(getRandomInt(0, 1));
+    if (isSelected) {
+      selectedOffers.push(offer);
+    }
+  });
 
   return {
     type: pointType,
     destination: getRandomArrayElement(DESTINATIONS),
-    offers: OFFERS.filter((offer) => offer.type === pointType),
+    offers: selectedOffers,
     info: {
       description: getRandomArrayElement(DESCRIPTIONS),
       photos: generatePhotos(getRandomInt(MIN_PHOTOS_COUNT, MAX_PHOTOS_COUNT))

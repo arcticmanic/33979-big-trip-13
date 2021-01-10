@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import {DESTINATIONS} from "../mock/point.js";
+import {DESTINATIONS, OFFERS} from "../mock/point.js";
 import {createElement} from "../utils.js";
 
 const createDestinationElementTemplate = (element) => {
@@ -8,11 +8,12 @@ const createDestinationElementTemplate = (element) => {
   `;
 };
 
-const createOfferTemplate = (offer) => {
+const createOfferTemplate = (offer, isChecked) => {
   const offerId = offer.title.replaceAll(` `, `-`);
+  const checkedAttribute = isChecked ? `checked` : ``;
   return `
     <div class="event__offer-selector">
-      <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offerId}" type="checkbox" name="event-offer-${offerId}" checked>
+      <input class="event__offer-checkbox visually-hidden" id="event-offer-${offerId}" type="checkbox" name="event-offer-${offerId}" ${checkedAttribute}>
       <label class="event__offer-label" for="event-offer-${offerId}">
         <span class="event__offer-title">${offer.title}</span>
         &plus;&euro;&nbsp;
@@ -35,7 +36,8 @@ const createEditPointTemplate = (point) => {
   const eventEndTime = dayjs(endTime).format(`DD/MM/YY HH:mm`);
 
   const destinationsMarkup = DESTINATIONS.map((element) => createDestinationElementTemplate(element)).join(``);
-  const offersMarkup = offers.map((element) => createOfferTemplate(element)).join(``);
+  const availableOffers = OFFERS.filter((offer) => offer.type === point.type);
+  const offersMarkup = availableOffers.map((element) => createOfferTemplate(element, offers.includes(element))).join(``);
   const photosMarkup = info.photos.map((element) => createPhotoTemplate(element)).join(``);
 
   return `
