@@ -6,6 +6,7 @@ import TripListView from "./view/trip-list.js";
 import TripEditPointView from "./view/trip-edit-point.js";
 import TripNewPointView from "./view/trip-new-point.js";
 import TripPointView from "./view/trip-point.js";
+import ListEmptyView from "./view/list-empty.js";
 import {generatePoint} from "./mock/point.js";
 import {render, RenderPosition} from "./utils.js";
 
@@ -62,17 +63,28 @@ const renderPoint = (pointListElement, point) => {
 
 const tripMainContainer = document.querySelector(`.trip-main`);
 const tripMenuContainer = tripMainContainer.querySelector(`.trip-main__trip-controls`);
-const tripEventsSection = document.querySelector(`.trip-events`);
 
-render(tripMainContainer, new TripInfoView(points).getElement(), RenderPosition.AFTERBEGIN);
 render(tripMenuContainer, new TripMenuView().getElement(), RenderPosition.AFTERBEGIN);
 render(tripMenuContainer, new TripFiltersView().getElement(), RenderPosition.BEFOREEND);
-render(tripEventsSection, new TripSortView().getElement(), RenderPosition.AFTERBEGIN);
 
-const tripListComponent = new TripListView();
-render(tripEventsSection, tripListComponent.getElement(), RenderPosition.BEFOREEND);
-render(tripListComponent.getElement(), new TripNewPointView().getElement(), RenderPosition.BEFOREEND);
+const renderTripBoard = (tripPoints) => {
+  const tripEventsSection = document.querySelector(`.trip-events`);
 
-for (let i = 0; i < POINT_COUNT; i++) {
-  renderPoint(tripListComponent.getElement(), points[i]);
-}
+  if (tripPoints.length === 0) {
+    render(tripEventsSection, new ListEmptyView().getElement(), RenderPosition.AFTERBEGIN);
+    return;
+  } else {
+    render(tripMainContainer, new TripInfoView(tripPoints).getElement(), RenderPosition.AFTERBEGIN);
+    render(tripEventsSection, new TripSortView().getElement(), RenderPosition.AFTERBEGIN);
+
+    const tripListComponent = new TripListView();
+    render(tripEventsSection, tripListComponent.getElement(), RenderPosition.BEFOREEND);
+    render(tripListComponent.getElement(), new TripNewPointView().getElement(), RenderPosition.BEFOREEND);
+
+    for (let i = 0; i < POINT_COUNT; i++) {
+      renderPoint(tripListComponent.getElement(), tripPoints[i]);
+    }
+  }
+};
+
+renderTripBoard(points);
