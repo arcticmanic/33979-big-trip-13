@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import {POINT_TYPES} from "../const.js";
-import {getRandomInt} from "../utils.js";
+import {getRandomInt} from "../utils/common.js";
 
 const MIN_OFFERS_COUNT = 0;
 const MAX_OFFERS_COUNT = 5;

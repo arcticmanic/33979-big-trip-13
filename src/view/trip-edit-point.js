@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import {DESTINATIONS, OFFERS} from "../mock/point.js";
-import {createElement} from "../utils.js";
+import AbstractView from "./abstract.js";
 
 const createDestinationElementTemplate = (element) => {
   return `
@@ -148,26 +148,36 @@ const createEditPointTemplate = (point) => {
   `;
 };
 
-export default class TripEditPoint {
+export default class TripEditPoint extends AbstractView {
   constructor(point) {
+    super();
     this._point = point;
 
-    this._element = null;
+    this._formSubmitHandler = this._formSubmitHandler.bind(this);
+    this._rollupBtnClickHandler = this._rollupBtnClickHandler.bind(this);
   }
 
   getTemplate() {
     return createEditPointTemplate(this._point);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
+  _formSubmitHandler(evt) {
+    evt.preventDefault();
+    this._callback.formSubmit();
   }
 
-  removeElement() {
-    this._element = null;
+  setFormSubmitHandler(callback) {
+    this._callback.formSubmit = callback;
+    this.getElement().querySelector(`form`).addEventListener(`submit`, this._formSubmitHandler);
+  }
+
+  _rollupBtnClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.editClick();
+  }
+
+  setRollupBtnClickHandler(callback) {
+    this._callback.editClick = callback;
+    this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._rollupBtnClickHandler);
   }
 }
