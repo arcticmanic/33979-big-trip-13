@@ -79,6 +79,8 @@ const generateOffers = () => {
   return offers;
 };
 
+const generateId = () => Date.now() + parseInt(Math.random() * 10000, 10);
+
 const generatePoint = () => {
   const startTime = getRandomDate();
   const endTime = startTime
@@ -96,6 +98,7 @@ const generatePoint = () => {
   });
 
   return {
+    id: generateId(),
     type: pointType,
     destination: getRandomArrayElement(DESTINATIONS),
     offers: selectedOffers,
