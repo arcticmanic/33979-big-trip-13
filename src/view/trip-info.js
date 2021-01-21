@@ -10,11 +10,11 @@ const createTripInfoTemplate = (points) => {
 
   if (points.length <= MAX_POINTS_COUNT) {
     points.forEach((element) => {
-      title += `${element.destination} &mdash; `;
+      title += `${element.destination.name} &mdash; `;
     });
     title = title.replace(new RegExp(`&mdash; ` + `$`), ``);
   } else {
-    title = `${points[0].destination} &mdash; &hellip; &mdash; ${points[points.length - 1].destination}`;
+    title = `${points[0].destination.name} &mdash; &hellip; &mdash; ${points[points.length - 1].destination.name}`;
   }
 
   dates = `${dayjs(points[0].startTime).format(`MMM D`)}&nbsp;&mdash;&nbsp;${dayjs(points[points.length - 1].endTime).format(`MMM D`)}`;

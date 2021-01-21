@@ -1,4 +1,4 @@
-const sortType = {
+const SortType = {
   DEFAULT: `sort-day`,
   TIME: `sort-time`,
   PRICE: `sort-price`
@@ -17,4 +17,4 @@ const POINT_TYPES = [
   `Restaurant`
 ];
 
-export {POINT_TYPES, sortType};
+export {POINT_TYPES, SortType};

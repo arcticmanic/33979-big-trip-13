@@ -22,7 +22,7 @@ const DESCRIPTIONS = [
   `Nunc fermentum tortor ac porta dapibus.`,
   `In rutrum ac purus sit amet tempus.`
 ];
-const DESTINATIONS = [
+const DESTINATION_NAMES = [
   `London`,
   `Sydney`,
   `Munich`,
@@ -36,6 +36,8 @@ const DESTINATIONS = [
   `Amsterdam`,
   `Kopenhagen`
 ];
+let DESTINATIONS = [];
+let OFFERS = [];
 
 const getRandomArrayElement = (arr) => {
   const randomIndex = getRandomInt(0, arr.length - 1);
@@ -64,12 +66,25 @@ const getRandomDate = () => {
   return dayjs(date);
 };
 
+const generateDestinations = () => {
+  let destinations = [];
+  DESTINATION_NAMES.forEach((name) => {
+    destinations.push({
+      name,
+      description: getRandomArrayElement(DESCRIPTIONS),
+      photos: generatePhotos(getRandomInt(MIN_PHOTOS_COUNT, MAX_PHOTOS_COUNT))
+    });
+  });
+  return destinations;
+};
+
 const generateOffers = () => {
   const offers = [];
   POINT_TYPES.forEach((pointType) => {
     const offersCount = getRandomInt(MIN_OFFERS_COUNT, MAX_OFFERS_COUNT);
     for (let i = 0; i < offersCount; i++) {
       offers.push({
+        id: `${pointType.toLowerCase()}-offer-${i}`,
         type: pointType,
         title: `${pointType} offer ${i}`,
         price: OFFER_PRICES[getRandomInt(0, OFFER_PRICES.length - 1)]
@@ -102,10 +117,6 @@ const generatePoint = () => {
     type: pointType,
     destination: getRandomArrayElement(DESTINATIONS),
     offers: selectedOffers,
-    info: {
-      description: getRandomArrayElement(DESCRIPTIONS),
-      photos: generatePhotos(getRandomInt(MIN_PHOTOS_COUNT, MAX_PHOTOS_COUNT))
-    },
     price: getRandomInt(MIN_PRICE, MAX_PRICE),
     startTime,
     endTime,
@@ -113,6 +124,7 @@ const generatePoint = () => {
   };
 };
 
-let OFFERS = generateOffers();
+DESTINATIONS = generateDestinations();
+OFFERS = generateOffers();
 
 export {generatePoint, DESTINATIONS, OFFERS};

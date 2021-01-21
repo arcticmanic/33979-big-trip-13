@@ -7,7 +7,7 @@ import ListEmptyView from "../view/list-empty.js";
 import PointPresenter from "./point.js";
 import {render, RenderPosition} from "../utils/render.js";
 import {updateItem} from "../utils/common.js";
-import {sortType} from "../const.js";
+import {SortType} from "../const.js";
 import {sortByDate, sortByTime, sortByPrice} from "../utils/sort.js";
 
 const tripEventsContainer = document.querySelector(`.trip-events`);
@@ -17,7 +17,7 @@ export default class Trip {
   constructor(tripContainer) {
     this._tripContainer = tripContainer;
     this._pointPresenter = {};
-    this._currentSortType = sortType.DEFAULT;
+    this._currentSortType = SortType.DEFAULT;
 
     this._listEmptyComponent = new ListEmptyView();
     this._tripSortComponent = new TripSortView();
@@ -99,17 +99,17 @@ export default class Trip {
 
   _sortPoints(type) {
     switch (type) {
-      case sortType.DEFAULT:
+      case SortType.DEFAULT:
         this._tripPoints.sort(sortByDate);
         break;
-      case sortType.TIME:
+      case SortType.TIME:
         this._tripPoints.sort(sortByTime);
         break;
-      case sortType.PRICE:
+      case SortType.PRICE:
         this._tripPoints.sort(sortByPrice);
         break;
     }
-    this._currentSortType = sortType;
+    this._currentSortType = SortType;
   }
 
   _changePointHandler(updatedPoint) {
