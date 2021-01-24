@@ -12,6 +12,14 @@ module.exports = {
     contentBase: path.resolve(__dirname, 'public'),
     watchContentBase: true,
   },
+  module: {
+    rules: [
+      {
+        test: /\.css$/i,
+        use: ['style-loader', 'css-loader']
+      }
+    ]
+  },
   plugins: [
     new CircularDependencyPlugin({
       exclude: /a\.js|node_modules/,

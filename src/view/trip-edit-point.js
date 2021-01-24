@@ -1,6 +1,8 @@
 import dayjs from "dayjs";
 import {DESTINATIONS, OFFERS} from "../mock/point.js";
 import SmartView from "./smart.js";
+import flatpickr from "flatpickr";
+import "../../node_modules/flatpickr/dist/flatpickr.min.css";
 
 const createDestinationElementTemplate = (element) => {
   return `
@@ -160,14 +162,19 @@ export default class TripEditPoint extends SmartView {
   constructor(point) {
     super();
     this._data = TripEditPoint.parsePointToData(point);
+    this._datepickerStart = null;
+    this._datepickerEnd = null;
 
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
     this._rollupBtnClickHandler = this._rollupBtnClickHandler.bind(this);
     this._pointTypeToggleHandler = this._pointTypeToggleHandler.bind(this);
     this._destinationToggleHandler = this._destinationToggleHandler.bind(this);
     this._offersSelectionChangedHandler = this._offersSelectionChangedHandler.bind(this);
+    this._startTimeChangeHandler = this._startTimeChangeHandler.bind(this);
+    this._endTimeChangeHandler = this._endTimeChangeHandler.bind(this);
 
     this._setInnerHandlers();
+    this._setDatepicker();
   }
 
   getTemplate() {
@@ -201,10 +208,10 @@ export default class TripEditPoint extends SmartView {
   }
 
   static parsePointToData(point) {
-    return Object.assign(
-        {},
-        point
-    );
+    let data = Object.assign({}, point);
+    data.offers = point.offers.slice();
+
+    return data;
   }
 
   static parseDataToPoint(data) {
@@ -240,7 +247,7 @@ export default class TripEditPoint extends SmartView {
       }, true);
     } else {
       this.updateData({
-        offers: this._data.filter((o) => o.id !== evt.target.id)
+        offers: this._data.offers.filter((o) => o.id !== evt.target.id)
       }, true);
     }
   }
@@ -259,7 +266,55 @@ export default class TripEditPoint extends SmartView {
 
   restoreHandlers() {
     this._setInnerHandlers();
+    this._setDatepicker();
     this.setFormSubmitHandler(this._callback.formSubmit);
     this.setRollupBtnClickHandler(this._callback.editClick);
+  }
+
+  _setDatepicker() {
+    if (this._datepickerStart) {
+      this._datepickerStart.destroy();
+      this._datepickerStart = null;
+    }
+    if (this._datepickerEnd) {
+      this._datepickerEnd.destroy();
+      this._datepickerEnd = null;
+    }
+
+    this._datepickerStart = flatpickr(
+        this.getElement().querySelector(`#event-start-time-1`),
+        {
+          dateFormat: `d/m/y H:i`,
+          enableTime: true,
+          default: `today`,
+          onChange: this._startTimeChangeHandler
+        }
+    );
+    this._datepickerEnd = flatpickr(
+        this.getElement().querySelector(`#event-end-time-1`),
+        {
+          dateFormat: `d/m/y H:i`,
+          enableTime: true,
+          default: `today`,
+          minDate: this._data.startTime.toDate(),
+          onChange: this._endTimeChangeHandler
+        }
+    );
+  }
+
+  _startTimeChangeHandler([userDate]) {
+    let newDate = dayjs(userDate);
+    if (newDate.isAfter(this._data.endTime)) {
+      this._data.endTime = newDate;
+    }
+    this.updateData({
+      startTime: dayjs(userDate)
+    });
+  }
+
+  _endTimeChangeHandler([userDate]) {
+    this.updateData({
+      endTime: dayjs(userDate)
+    });
   }
 }
