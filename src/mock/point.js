@@ -55,8 +55,8 @@ const generatePhotos = (count) => {
 };
 
 const getRandomDate = () => {
-  const minYear = 2019;
-  const maxYear = 2021;
+  const minYear = 2020;
+  const maxYear = 2025;
   const year = getRandomInt(minYear, maxYear);
   const month = getRandomInt(0, 11);
   const day = getRandomInt(1, 28);
@@ -127,4 +127,4 @@ const generatePoint = () => {
 DESTINATIONS = generateDestinations();
 OFFERS = generateOffers();
 
-export {generatePoint, DESTINATIONS, OFFERS};
+export {generatePoint, DESTINATIONS, OFFERS, generateId};
