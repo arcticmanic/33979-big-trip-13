@@ -426,4 +426,51 @@ export default class TripEditPoint extends SmartView {
     this._callback.deleteClick = callback;
     this.getElement().querySelector(`.event__reset-btn`).addEventListener(`click`, this._formDeleteClickHandler);
   }
+
+  _setDatepicker() {
+    if (this._datepickerStart) {
+      this._datepickerStart.destroy();
+      this._datepickerStart = null;
+    }
+    if (this._datepickerEnd) {
+      this._datepickerEnd.destroy();
+      this._datepickerEnd = null;
+    }
+
+    this._datepickerStart = flatpickr(
+        this.getElement().querySelector(`#event-start-time-1`),
+        {
+          dateFormat: `d/m/y H:i`,
+          enableTime: true,
+          default: `today`,
+          onChange: this._startTimeChangeHandler
+        }
+    );
+    this._datepickerEnd = flatpickr(
+        this.getElement().querySelector(`#event-end-time-1`),
+        {
+          dateFormat: `d/m/y H:i`,
+          enableTime: true,
+          default: `today`,
+          minDate: this._data.startTime.toDate(),
+          onChange: this._endTimeChangeHandler
+        }
+    );
+  }
+
+  _startTimeChangeHandler([userDate]) {
+    let newDate = dayjs(userDate);
+    if (newDate.isAfter(this._data.endTime)) {
+      this._data.endTime = newDate;
+    }
+    this.updateData({
+      startTime: dayjs(userDate)
+    });
+  }
+
+  _endTimeChangeHandler([userDate]) {
+    this.updateData({
+      endTime: dayjs(userDate)
+    });
+  }
 }
