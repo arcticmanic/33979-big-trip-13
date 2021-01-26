@@ -20,7 +20,8 @@ const POINT_TYPES = [
 const UserAction = {
   UPDATE_POINT: `UPDATE_POINT`,
   ADD_POINT: `ADD_POINT`,
-  DELETE_POINT: `DELETE_POINT`
+  DELETE_POINT: `DELETE_POINT`,
+  CANCEL_ADD_POINT: `CANCEL_ADD_POINT`
 };
 
 const UpdateType = {
@@ -35,4 +36,9 @@ const FilterType = {
   FUTURE: `future`
 };
 
-export {POINT_TYPES, SortType, UserAction, UpdateType, FilterType};
+const MenuItem = {
+  TABLE: `TABLE`,
+  STATS: `STATS`
+};
+
+export {POINT_TYPES, SortType, UserAction, UpdateType, FilterType, MenuItem};

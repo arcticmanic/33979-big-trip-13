@@ -11,7 +11,7 @@ export default class NewPoint {
     this._pointEditComponent = null;
 
     this._handleFormSubmit = this._handleFormSubmit.bind(this);
-    this._handleDeleteClick = this._handleDeleteClick.bind(this);
+    this._handleCancelClick = this._handleCancelClick.bind(this);
     this._escKeyDownHandler = this._escKeyDownHandler.bind(this);
   }
 
@@ -22,7 +22,7 @@ export default class NewPoint {
 
     this._pointEditComponent = new TripEditPointView(null);
     this._pointEditComponent.setFormSubmitHandler(this._handleFormSubmit);
-    this._pointEditComponent.setDeleteBtnClickHandler(this._handleDeleteClick);
+    this._pointEditComponent.setDeleteBtnClickHandler(this._handleCancelClick);
 
     render(this._tripListContainer, this._pointEditComponent, RenderPosition.AFTERBEGIN);
 
@@ -51,13 +51,23 @@ export default class NewPoint {
     this.destroy();
   }
 
-  _handleDeleteClick() {
+  _handleCancelClick() {
+    this._changeData(
+        UserAction.CANCEL_ADD_POINT,
+        UpdateType.MAJOR,
+        null
+    );
     this.destroy();
   }
 
   _escKeyDownHandler(evt) {
     if (evt.key === `Escape` || evt.key === `Esc`) {
       evt.preventDefault();
+      this._changeData(
+          UserAction.CANCEL_ADD_POINT,
+          UpdateType.MAJOR,
+          null
+      );
       this.destroy();
     }
   }

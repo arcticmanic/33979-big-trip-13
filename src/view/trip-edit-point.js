@@ -1,4 +1,5 @@
 import dayjs from "dayjs";
+import he from "he";
 import {DESTINATIONS, OFFERS} from "../mock/point.js";
 import SmartView from "./smart.js";
 import flatpickr from "flatpickr";
@@ -148,7 +149,7 @@ const createEditPointTemplate = (data) => {
             <label class="event__label event__type-output" for="event-destination-1">
               ${type}
             </label>
-            <input class="event__input event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destinationName}" list="destination-list-1">
+            <input class="event__input event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${he.encode(destinationName)}" list="destination-list-1">
             <datalist id="destination-list-1">
               ${destinationsMarkup}
             </datalist>
@@ -165,7 +166,7 @@ const createEditPointTemplate = (data) => {
               <span class="visually-hidden">Price</span>
               &euro;
             </label>
-            <input class="event__input event__input--price" id="event-price-1" type="text" pattern="[0-9]+" title="Integer number" name="event-price" value="${price}" />
+            <input class="event__input  event__input--price" id="event-price-1" type="text" pattern="[0-9]+" title="Integer number" name="event-price" value="${he.encode(price.toString())}">
           </div>
           ${buttonsMarkup}
         </header>
@@ -316,8 +317,12 @@ export default class TripEditPoint extends SmartView {
         price: 0
       }, false);
     } else {
+      let priceStr = evt.target.value;
+      if (priceStr === ``) {
+        priceStr = `0`;
+      }
       this.updateData({
-        price: parseInt(evt.target.value, 10)
+        price: parseInt(priceStr, 10)
       }, false);
     }
   }
