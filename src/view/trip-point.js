@@ -33,7 +33,7 @@ const createOfferTemplate = (offer) => {
 const createTripPointTemplate = (point) => {
   const {type, destination, price, startTime, endTime, offers, isFavorite} = point;
 
-  const date = dayjs(startTime).format(`MMM D`);
+  const date = dayjs(startTime).format(`MMM D YYYY`);
   const eventStartTime = dayjs(startTime).format(`HH:mm`);
   const eventEndTime = dayjs(endTime).format(`HH:mm`);
 
