@@ -1,4 +1,6 @@
+import dayjs from "dayjs";
 import Observer from "../utils/observer.js";
+import {capitalize} from "../utils/common.js";
 
 export default class Points extends Observer {
   constructor() {
@@ -6,8 +8,9 @@ export default class Points extends Observer {
     this._points = [];
   }
 
-  setPoints(points) {
+  setPoints(updateType, points) {
     this._points = points.slice();
+    this._notify(updateType);
   }
 
   getPoints() {
@@ -50,5 +53,51 @@ export default class Points extends Observer {
     ];
 
     this._notify(updateType);
+  }
+
+  static adaptToClient(point) {
+    const adaptedPoint = Object.assign(
+        {},
+        point,
+        {
+          price: point.base_price,
+          startTime: point.date_from !== null ? dayjs(new Date(point.date_from)) : point.date_from, // На клиенте дата хранится как экземпляр Date
+          endTime: point.date_to !== null ? dayjs(new Date(point.date_to)) : point.date_to, // На клиенте дата хранится как экземпляр Date
+          isFavorite: point.is_favorite,
+        }
+    );
+
+    adaptedPoint.type = capitalize(adaptedPoint.type);
+
+    // Ненужные ключи мы удаляем
+    delete adaptedPoint.base_price;
+    delete adaptedPoint.date_from;
+    delete adaptedPoint.date_to;
+    delete adaptedPoint.is_favorite;
+
+    return adaptedPoint;
+  }
+
+  static adaptToServer(point) {
+    const adaptedPoint = Object.assign(
+        {},
+        point,
+        {
+          "base_price": point.price,
+          "date_from": point.startTime instanceof dayjs ? point.startTime.toISOString() : null, // На сервере дата хранится в ISO формате
+          "date_to": point.endTime instanceof dayjs ? point.endTime.toISOString() : null, // На сервере дата хранится в ISO формате
+          "is_favorite": point.isFavorite,
+        }
+    );
+
+    adaptedPoint.type = adaptedPoint.type.toLowerCase();
+
+    // Ненужные ключи мы удаляем
+    delete adaptedPoint.price;
+    delete adaptedPoint.startTime;
+    delete adaptedPoint.endTime;
+    delete adaptedPoint.isFavorite;
+
+    return adaptedPoint;
   }
 }
