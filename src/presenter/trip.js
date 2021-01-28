@@ -7,7 +7,7 @@ import NewButtonView from "../view/new-button.js";
 import StatisticsView from "../view/statistics.js";
 import LoadingView from "../view/loading.js";
 import LoadingErrorView from "../view/loading-error.js";
-import PointPresenter from "./point.js";
+import PointPresenter, {State as PointPresenterViewState} from "./point.js";
 import NewPointPresenter from "./new-point.js";
 import {remove, render, RenderPosition} from "../utils/render.js";
 import {FilterType, SortType, UpdateType, UserAction, MenuItem} from "../const.js";
@@ -191,17 +191,37 @@ export default class Trip {
   _handleViewAction(actionType, updateType, update) {
     switch (actionType) {
       case UserAction.UPDATE_POINT:
+        this._pointPresenter[update.id].setViewState(PointPresenterViewState.SAVING);
         this._api.updatePoint(update)
           .then((response) => {
             this._pointsModel.updatePoint(updateType, response);
+          }).catch(() => {
+            this._pointPresenter[update.id].setViewState(PointPresenterViewState.ABORTING);
           });
         break;
       case UserAction.ADD_POINT:
-        this._newButtonComponent.getElement().disabled = false;
-        this._pointsModel.addPoint(updateType, update);
+        this._newPointPresenter.setSaving();
+        this._api.addPoint(update)
+          .then((response) => {
+            this._pointsModel.addPoint(updateType, response);
+            this._newButtonComponent.getElement().disabled = false;
+          })
+          .catch(() => {
+            this._newPointPresenter.setAborting();
+          });
         break;
       case UserAction.DELETE_POINT:
-        this._pointsModel.deletePoint(updateType, update);
+        this._pointPresenter[update.id].setViewState(PointPresenterViewState.DELETING);
+        this._newButtonComponent.getElement().disabled = true;
+        this._api.deletePoint(update)
+          .then(() => {
+            this._pointsModel.deletePoint(updateType, update);
+            this._newButtonComponent.getElement().disabled = false;
+          })
+          .catch(() => {
+            this._pointPresenter[update.id].setViewState(PointPresenterViewState.ABORTING);
+            this._newButtonComponent.getElement().disabled = false;
+          });
         break;
       case UserAction.CANCEL_ADD_POINT:
         this._newButtonComponent.getElement().disabled = false;

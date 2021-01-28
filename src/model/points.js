@@ -61,15 +61,14 @@ export default class Points extends Observer {
         point,
         {
           price: point.base_price,
-          startTime: point.date_from !== null ? dayjs(new Date(point.date_from)) : point.date_from, // На клиенте дата хранится как экземпляр Date
-          endTime: point.date_to !== null ? dayjs(new Date(point.date_to)) : point.date_to, // На клиенте дата хранится как экземпляр Date
+          startTime: point.date_from !== null ? dayjs(new Date(point.date_from)) : point.date_from,
+          endTime: point.date_to !== null ? dayjs(new Date(point.date_to)) : point.date_to,
           isFavorite: point.is_favorite,
         }
     );
 
     adaptedPoint.type = capitalize(adaptedPoint.type);
 
-    // Ненужные ключи мы удаляем
     delete adaptedPoint.base_price;
     delete adaptedPoint.date_from;
     delete adaptedPoint.date_to;
@@ -84,15 +83,14 @@ export default class Points extends Observer {
         point,
         {
           "base_price": point.price,
-          "date_from": point.startTime instanceof dayjs ? point.startTime.toISOString() : null, // На сервере дата хранится в ISO формате
-          "date_to": point.endTime instanceof dayjs ? point.endTime.toISOString() : null, // На сервере дата хранится в ISO формате
+          "date_from": point.startTime instanceof dayjs ? point.startTime.toISOString() : null,
+          "date_to": point.endTime instanceof dayjs ? point.endTime.toISOString() : null,
           "is_favorite": point.isFavorite,
         }
     );
 
     adaptedPoint.type = adaptedPoint.type.toLowerCase();
 
-    // Ненужные ключи мы удаляем
     delete adaptedPoint.price;
     delete adaptedPoint.startTime;
     delete adaptedPoint.endTime;
