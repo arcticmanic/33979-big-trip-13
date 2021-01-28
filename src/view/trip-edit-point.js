@@ -14,12 +14,12 @@ const getOfferId = (title) => {
   return title.split(` `).join(`-`);
 };
 
-const createOfferItemTemplate = (offer, isChecked) => {
+const createOfferItemTemplate = (offer, isChecked, isDisabled) => {
   const checkedAttribute = isChecked ? `checked` : ``;
   const offerId = `${getOfferId(offer.title)}`;
   return `
     <div class="event__offer-selector">
-      <input class="event__offer-checkbox visually-hidden" id="${offerId}" type="checkbox" name="event-offer-${offerId}" ${checkedAttribute}>
+      <input class="event__offer-checkbox visually-hidden" id="${offerId}" type="checkbox" name="event-offer-${offerId}" ${checkedAttribute} ${isDisabled ? `disabled` : ``}>
       <label class="event__offer-label" for="${offerId}">
         <span class="event__offer-title">${offer.title}</span>
         &plus;&euro;&nbsp;
@@ -29,13 +29,15 @@ const createOfferItemTemplate = (offer, isChecked) => {
   `;
 };
 
-const createOffersTemplate = (offers, selectedOffers) => {
+const createOffersTemplate = (offers, selectedOffers, isDisabled) => {
   if (offers === null || offers.length === 0) {
     return ``;
   }
   let offersMarkup = offers.map(
-      (element) => createOfferItemTemplate(element, selectedOffers.some(
-          (selectedOffer) => selectedOffer.title === element.title && selectedOffer.price === element.price)
+      (element) => createOfferItemTemplate(
+          element,
+          selectedOffers.some((selectedOffer) => selectedOffer.title === element.title && selectedOffer.price === element.price),
+          isDisabled
       )).join(``);
   return `
       <section class="event__section  event__section--offers">
@@ -74,106 +76,114 @@ const createDestinationTemplate = (destination) => {
   `;
 };
 
-const createButtonsTemplate = (isNew, destinationSelected = false) => {
-  const resetBtnText = isNew ? `Cancel` : `Delete`;
+const createButtonsTemplate = (isNew, isDisabled, isSaving, isDeleting, destinationSelected = false) => {
+  let resetBtnText = ``;
+  if (isNew) {
+    resetBtnText = `Cancel`;
+  } else {
+    resetBtnText = isDeleting ? `Deleting...` : `Delete`;
+  }
   const rollupBtnClass = isNew ? `visually-hidden` : `event__rollup-btn`;
   return `
-    <button class="event__save-btn  btn  btn--blue" type="submit" ${destinationSelected ? `` : `disabled`}>Save</button>
-    <button class="event__reset-btn" type="reset">${resetBtnText}</button>
+    <button class="event__save-btn  btn  btn--blue" type="submit" ${destinationSelected && !isDisabled ? `` : `disabled`}>${isSaving ? `Saving...` : `Save`}</button>
+    <button class="event__reset-btn" type="reset" ${isDisabled ? `disabled` : ``}>${resetBtnText}</button>
     <button class="${rollupBtnClass}" type="button">
       <span class="visually-hidden">Open event</span>
     </button>`;
 };
 
 const createEditPointTemplate = (data, destinations, allOffers) => {
-  const {type, destination, price, startTime, endTime, offers, isNew} = data;
+  const {type, destination, price, startTime, endTime, offers, isNew, isDisabled, isSaving, isDeleting} = data;
+
   const destinationName = destination === null ? `` : destination.name;
+
   const eventStartTime = startTime === null ? `` : dayjs(startTime).format(`DD/MM/YY HH:mm`);
   const eventEndTime = endTime === null ? `` : dayjs(endTime).format(`DD/MM/YY HH:mm`);
+
   const destinationsMarkup = destinations.map((element) => createDestinationElementTemplate(element)).join(``);
   const availableOffers = allOffers.find((element) => element.type === type.toLowerCase()).offers;
-  const offersSectionMarkup = createOffersTemplate(availableOffers, offers);
+  const offersSectionMarkup = createOffersTemplate(availableOffers, offers, isDisabled);
   const destinationSectionMarkup = createDestinationTemplate(destination);
-  const buttonsMarkup = createButtonsTemplate(isNew, destination !== null);
+  const buttonsMarkup = createButtonsTemplate(isNew, isDisabled, isSaving, isDeleting, destination !== null);
 
   return `
     <li class="trip-events__item">
       <form class="event event--edit" action="#" method="post">
         <header class="event__header">
           <div class="event__type-wrapper">
-            <label class="event__type event__type-btn" for="event-type-toggle-1">
+            <label class="event__type  event__type-btn" for="event-type-toggle-1">
               <span class="visually-hidden">Choose event type</span>
-              <img class="event__type-icon" width="17" height="17" src="img/icons/${type.toLowerCase()}.png" alt="Event type icon" />
+              <img class="event__type-icon" width="17" height="17" src="img/icons/${type.toLowerCase()}.png" alt="Event type icon">
             </label>
-            <input class="event__type-toggle visually-hidden" id="event-type-toggle-1" type="checkbox" value="${type}" />
+            <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox" value="${type}" ${isDisabled ? `disabled` : ``}>
             <div class="event__type-list">
               <fieldset class="event__type-group">
                 <legend class="visually-hidden">Event type</legend>
                 <div class="event__type-item">
-                  <input id="event-type-taxi-1" class="event__type-input visually-hidden" type="radio" name="event-type" value="taxi" />
-                  <label class="event__type-label event__type-label--taxi" for="event-type-taxi-1">Taxi</label>
+                  <input id="event-type-taxi-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="taxi">
+                  <label class="event__type-label  event__type-label--taxi" for="event-type-taxi-1">Taxi</label>
                 </div>
                 <div class="event__type-item">
-                  <input id="event-type-bus-1" class="event__type-input visually-hidden" type="radio" name="event-type" value="bus" />
-                  <label class="event__type-label event__type-label--bus" for="event-type-bus-1">Bus</label>
+                  <input id="event-type-bus-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="bus">
+                  <label class="event__type-label  event__type-label--bus" for="event-type-bus-1">Bus</label>
                 </div>
                 <div class="event__type-item">
-                  <input id="event-type-train-1" class="event__type-input visually-hidden" type="radio" name="event-type" value="train" />
-                  <label class="event__type-label event__type-label--train" for="event-type-train-1">Train</label>
+                  <input id="event-type-train-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="train">
+                  <label class="event__type-label  event__type-label--train" for="event-type-train-1">Train</label>
                 </div>
                 <div class="event__type-item">
-                  <input id="event-type-ship-1" class="event__type-input visually-hidden" type="radio" name="event-type" value="ship" />
-                  <label class="event__type-label event__type-label--ship" for="event-type-ship-1">Ship</label>
+                  <input id="event-type-ship-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="ship">
+                  <label class="event__type-label  event__type-label--ship" for="event-type-ship-1">Ship</label>
                 </div>
                 <div class="event__type-item">
-                  <input id="event-type-transport-1" class="event__type-input visually-hidden" type="radio" name="event-type" value="transport" />
-                  <label class="event__type-label event__type-label--transport" for="event-type-transport-1">Transport</label>
+                  <input id="event-type-transport-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="transport">
+                  <label class="event__type-label  event__type-label--transport" for="event-type-transport-1">Transport</label>
                 </div>
                 <div class="event__type-item">
-                  <input id="event-type-drive-1" class="event__type-input visually-hidden" type="radio" name="event-type" value="drive" />
-                  <label class="event__type-label event__type-label--drive" for="event-type-drive-1">Drive</label>
+                  <input id="event-type-drive-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="drive">
+                  <label class="event__type-label  event__type-label--drive" for="event-type-drive-1">Drive</label>
                 </div>
                 <div class="event__type-item">
-                  <input id="event-type-flight-1" class="event__type-input visually-hidden" type="radio" name="event-type" value="flight">
-                  <label class="event__type-label event__type-label--flight" for="event-type-flight-1">Flight</label>
+                  <input id="event-type-flight-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="flight">
+                  <label class="event__type-label  event__type-label--flight" for="event-type-flight-1">Flight</label>
                 </div>
                 <div class="event__type-item">
-                  <input id="event-type-check-in-1" class="event__type-input visually-hidden" type="radio" name="event-type" value="check-in" />
-                  <label class="event__type-label event__type-label--check-in" for="event-type-check-in-1">Check-in</label>
+                  <input id="event-type-check-in-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="check-in">
+                  <label class="event__type-label  event__type-label--check-in" for="event-type-check-in-1">Check-in</label>
                 </div>
                 <div class="event__type-item">
-                  <input id="event-type-sightseeing-1" class="event__type-input visually-hidden" type="radio" name="event-type" value="sightseeing" />
-                  <label class="event__type-label event__type-label--sightseeing" for="event-type-sightseeing-1">Sightseeing</label>
+                  <input id="event-type-sightseeing-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="sightseeing">
+                  <label class="event__type-label  event__type-label--sightseeing" for="event-type-sightseeing-1">Sightseeing</label>
                 </div>
                 <div class="event__type-item">
-                  <input id="event-type-restaurant-1" class="event__type-input visually-hidden" type="radio" name="event-type" value="restaurant" />
-                  <label class="event__type-label event__type-label--restaurant" for="event-type-restaurant-1">Restaurant</label>
+                  <input id="event-type-restaurant-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="restaurant">
+                  <label class="event__type-label  event__type-label--restaurant" for="event-type-restaurant-1">Restaurant</label>
                 </div>
               </fieldset>
             </div>
           </div>
-          <div class="event__field-group event__field-group--destination">
-            <label class="event__label event__type-output" for="event-destination-1">
+          <div class="event__field-group  event__field-group--destination">
+            <label class="event__label  event__type-output" for="event-destination-1">
               ${type}
             </label>
-            <input class="event__input event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${he.encode(destinationName)}" list="destination-list-1">
+            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${he.encode(destinationName)}" list="destination-list-1" ${isDisabled ? `disabled` : ``}>
             <datalist id="destination-list-1">
               ${destinationsMarkup}
             </datalist>
           </div>
-          <div class="event__field-group event__field-group--time">
+          <div class="event__field-group  event__field-group--time">
             <label class="visually-hidden" for="event-start-time-1">From</label>
-            <input class="event__input event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${eventStartTime}" />
+            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${eventStartTime}" ${isDisabled ? `disabled` : ``}>
             &mdash;
             <label class="visually-hidden" for="event-end-time-1">To</label>
-            <input class="event__input event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${eventEndTime}" />
+            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${eventEndTime}" ${isDisabled ? `disabled` : ``}>
           </div>
-          <div class="event__field-group event__field-group--price">
+          <div class="event__field-group  event__field-group--price">
             <label class="event__label" for="event-price-1">
               <span class="visually-hidden">Price</span>
               &euro;
             </label>
-            <input class="event__input  event__input--price" id="event-price-1" type="text" pattern="[0-9]+" title="Integer number" name="event-price" value="${he.encode(price.toString())}">
+            <input class="event__input  event__input--price" id="event-price-1" type="text" pattern="[0-9]+" title="Integer number" name="event-price" value="${he.encode(price.toString())}" ${isDisabled ? `disabled` : ``}>
           </div>
           ${buttonsMarkup}
         </header>
@@ -264,14 +274,19 @@ export default class TripEditPoint extends SmartView {
         startTime: dayjs(),
         endTime: dayjs(),
         offers: [],
-        isNew: true
+        isNew: true,
+        isDisabled: false,
+        isSaving: false,
       };
     }
     let data = Object.assign(
         {},
         point,
         {
-          isNew: point.type === null
+          isNew: point.type === null,
+          isDisabled: false,
+          isSaving: false,
+          isDeleting: false
         }
     );
     data.offers = point.offers.slice();
@@ -280,7 +295,13 @@ export default class TripEditPoint extends SmartView {
 
   static parseDataToPoint(data) {
     let point = Object.assign({}, data);
+    if (point.isNew) {
+      point.isFavorite = false;
+    }
     delete point.isNew;
+    delete point.isDisabled;
+    delete point.isSaving;
+    delete point.isDeleting;
     return point;
   }
 
@@ -298,6 +319,7 @@ export default class TripEditPoint extends SmartView {
 
   _destinationToggleHandler(evt) {
     evt.preventDefault();
+
     let optionFound = false;
     const datalist = evt.target.list;
     for (let j = 0; j < datalist.options.length; j++) {
@@ -319,10 +341,6 @@ export default class TripEditPoint extends SmartView {
     }
   }
 
-  _getOffersForType(type) {
-    return this._availableOffers.find((element) => element.type === type.toLowerCase()).offers;
-  }
-
   _priceChangeHandler(evt) {
     evt.preventDefault();
     if (!evt.target.validity.valid) {
@@ -338,6 +356,10 @@ export default class TripEditPoint extends SmartView {
         price: parseInt(priceStr, 10)
       }, false);
     }
+  }
+
+  _getOffersForType(type) {
+    return this._availableOffers.find((element) => element.type === type.toLowerCase()).offers;
   }
 
   _offersSelectionChangedHandler(evt) {
@@ -438,52 +460,5 @@ export default class TripEditPoint extends SmartView {
   setDeleteBtnClickHandler(callback) {
     this._callback.deleteClick = callback;
     this.getElement().querySelector(`.event__reset-btn`).addEventListener(`click`, this._formDeleteClickHandler);
-  }
-
-  _setDatepicker() {
-    if (this._datepickerStart) {
-      this._datepickerStart.destroy();
-      this._datepickerStart = null;
-    }
-    if (this._datepickerEnd) {
-      this._datepickerEnd.destroy();
-      this._datepickerEnd = null;
-    }
-
-    this._datepickerStart = flatpickr(
-        this.getElement().querySelector(`#event-start-time-1`),
-        {
-          dateFormat: `d/m/y H:i`,
-          enableTime: true,
-          default: `today`,
-          onChange: this._startTimeChangeHandler
-        }
-    );
-    this._datepickerEnd = flatpickr(
-        this.getElement().querySelector(`#event-end-time-1`),
-        {
-          dateFormat: `d/m/y H:i`,
-          enableTime: true,
-          default: `today`,
-          minDate: this._data.startTime.toDate(),
-          onChange: this._endTimeChangeHandler
-        }
-    );
-  }
-
-  _startTimeChangeHandler([userDate]) {
-    let newDate = dayjs(userDate);
-    if (newDate.isAfter(this._data.endTime)) {
-      this._data.endTime = newDate;
-    }
-    this.updateData({
-      startTime: dayjs(userDate)
-    });
-  }
-
-  _endTimeChangeHandler([userDate]) {
-    this.updateData({
-      endTime: dayjs(userDate)
-    });
   }
 }
