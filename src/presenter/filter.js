@@ -4,10 +4,12 @@ import {filter} from "../utils/filter.js";
 import {FilterType, UpdateType} from "../const.js";
 
 export default class Filter {
-  constructor(filterContainer, filterModel, pointsModel) {
+  constructor(filterContainer, filterModel, pointsModel, offersModel, destinationsModel) {
     this._filterContainer = filterContainer;
     this._filterModel = filterModel;
     this._pointsModel = pointsModel;
+    this._offersModel = offersModel;
+    this._destinationsModel = destinationsModel;
     this._currentFilter = null;
 
     this._filterComponent = null;
@@ -16,6 +18,8 @@ export default class Filter {
     this._handleFilterTypeChange = this._handleFilterTypeChange.bind(this);
 
     this._pointsModel.addObserver(this._handleModelEvent);
+    this._offersModel.addObserver(this._handleModelEvent);
+    this._destinationsModel.addObserver(this._handleModelEvent);
     this._filterModel.addObserver(this._handleModelEvent);
   }
 
@@ -50,7 +54,10 @@ export default class Filter {
   }
 
   _getFilters() {
-    const points = this._pointsModel.getPoints();
+    let points = this._pointsModel.getPoints();
+    if (this._offersModel.getAllOffers().length === 0 || this._destinationsModel.getDestinations().length === 0) {
+      points = [];
+    }
 
     return [
       {

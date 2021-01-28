@@ -4,6 +4,7 @@ import SmartView from "./smart.js";
 import {getChartLabels, calculateCostByPointType, calculateCountByPointType, calculateTimeByPointType} from "../utils/stats.js";
 
 const MINUTES_PER_DAY = 1440;
+const BAR_HEIGHT = 55;
 
 const renderMoneyChart = (ctx, points) => {
   const chartLabels = getChartLabels(points);
@@ -273,7 +274,6 @@ export default class Statistics extends SmartView {
     const typeCtx = this.getElement().querySelector(`.statistics__chart--transport`);
     const timeCtx = this.getElement().querySelector(`.statistics__chart--time`);
 
-    const BAR_HEIGHT = 55;
     const barsCount = getChartLabels(points).length;
     moneyCtx.height = BAR_HEIGHT * barsCount;
     typeCtx.height = BAR_HEIGHT * barsCount;

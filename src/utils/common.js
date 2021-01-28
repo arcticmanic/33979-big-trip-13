@@ -22,4 +22,10 @@ const isDateInPast = (date) => {
   return dayjs(date).isBefore(dayjs());
 };
 
-export {getRandomInt, isDatesEqual, isDateInFuture, isDateInPast};
+const capitalize = (s) => {
+  return s[0].toUpperCase() + s.slice(1);
+};
+
+const generateId = () => Date.now() + parseInt(Math.random() * 10000, 10);
+
+export {getRandomInt, isDatesEqual, isDateInFuture, isDateInPast, capitalize, generateId};

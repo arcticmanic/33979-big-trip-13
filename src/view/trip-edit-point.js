@@ -1,6 +1,5 @@
 import dayjs from "dayjs";
 import he from "he";
-import {DESTINATIONS, OFFERS} from "../mock/point.js";
 import SmartView from "./smart.js";
 import flatpickr from "flatpickr";
 import "../../node_modules/flatpickr/dist/flatpickr.min.css";
@@ -11,12 +10,17 @@ const createDestinationElementTemplate = (element) => {
   `;
 };
 
+const getOfferId = (title) => {
+  return title.split(` `).join(`-`);
+};
+
 const createOfferItemTemplate = (offer, isChecked) => {
   const checkedAttribute = isChecked ? `checked` : ``;
+  const offerId = `${getOfferId(offer.title)}`;
   return `
     <div class="event__offer-selector">
-      <input class="event__offer-checkbox visually-hidden" id="${offer.id}" type="checkbox" name="event-offer-${offer.id}" ${checkedAttribute}>
-      <label class="event__offer-label" for="${offer.id}">
+      <input class="event__offer-checkbox visually-hidden" id="${offerId}" type="checkbox" name="event-offer-${offerId}" ${checkedAttribute}>
+      <label class="event__offer-label" for="${offerId}">
         <span class="event__offer-title">${offer.title}</span>
         &plus;&euro;&nbsp;
         <span class="event__offer-price">${offer.price}</span>
@@ -29,7 +33,10 @@ const createOffersTemplate = (offers, selectedOffers) => {
   if (offers === null || offers.length === 0) {
     return ``;
   }
-  let offersMarkup = offers.map((element) => createOfferItemTemplate(element, selectedOffers.includes(element))).join(``);
+  let offersMarkup = offers.map(
+      (element) => createOfferItemTemplate(element, selectedOffers.some(
+          (selectedOffer) => selectedOffer.title === element.title && selectedOffer.price === element.price)
+      )).join(``);
   return `
       <section class="event__section  event__section--offers">
         <h3 class="event__section-title  event__section-title--offers">Offers</h3>
@@ -40,9 +47,9 @@ const createOffersTemplate = (offers, selectedOffers) => {
   `;
 };
 
-const createPhotoTemplate = (imgPath) => {
+const createPhotoTemplate = (pic) => {
   return `
-    <img class="event__photo" src="${imgPath}" alt="Event photo">
+    <img class="event__photo" src="${pic.src}" alt="${pic.description}">
   `;
 };
 
@@ -50,10 +57,10 @@ const createDestinationTemplate = (destination) => {
   if (destination === null) {
     return ``;
   }
-  if (!destination.description && (destination.photos === null || destination.photos.length === 0)) {
+  if (!destination.description && (destination.pictures === null || destination.pictures.length === 0)) {
     return ``;
   }
-  const photosMarkup = destination.photos.map((element) => createPhotoTemplate(element)).join(``);
+  const photosMarkup = destination.pictures.map((element) => createPhotoTemplate(element)).join(``);
   return `
     <section class="event__section event__section--destination">
       <h3 class="event__section-title event__section-title--destination">Destination</h3>
@@ -78,13 +85,13 @@ const createButtonsTemplate = (isNew, destinationSelected = false) => {
     </button>`;
 };
 
-const createEditPointTemplate = (data) => {
+const createEditPointTemplate = (data, destinations, allOffers) => {
   const {type, destination, price, startTime, endTime, offers, isNew} = data;
   const destinationName = destination === null ? `` : destination.name;
   const eventStartTime = startTime === null ? `` : dayjs(startTime).format(`DD/MM/YY HH:mm`);
   const eventEndTime = endTime === null ? `` : dayjs(endTime).format(`DD/MM/YY HH:mm`);
-  const destinationsMarkup = DESTINATIONS.map((element) => createDestinationElementTemplate(element)).join(``);
-  const availableOffers = type === null ? [] : OFFERS.filter((offer) => offer.type.toLowerCase() === data.type.toLowerCase());
+  const destinationsMarkup = destinations.map((element) => createDestinationElementTemplate(element)).join(``);
+  const availableOffers = allOffers.find((element) => element.type === type.toLowerCase()).offers;
   const offersSectionMarkup = createOffersTemplate(availableOffers, offers);
   const destinationSectionMarkup = createDestinationTemplate(destination);
   const buttonsMarkup = createButtonsTemplate(isNew, destination !== null);
@@ -180,9 +187,11 @@ const createEditPointTemplate = (data) => {
 };
 
 export default class TripEditPoint extends SmartView {
-  constructor(point) {
+  constructor(point, destinations, availableOffers) {
     super();
     this._data = TripEditPoint.parsePointToData(point);
+    this._destinations = destinations;
+    this._availableOffers = availableOffers;
     this._datepickerStart = null;
     this._datepickerEnd = null;
 
@@ -214,7 +223,7 @@ export default class TripEditPoint extends SmartView {
   }
 
   getTemplate() {
-    return createEditPointTemplate(this._data);
+    return createEditPointTemplate(this._data, this._destinations, this._availableOffers);
   }
 
   reset(point) {
@@ -278,18 +287,18 @@ export default class TripEditPoint extends SmartView {
   _pointTypeToggleHandler(evt) {
     evt.preventDefault();
     this.updateData({
-      type: evt.target.value
+      type: evt.target.value,
+      offers: []
     });
   }
 
   _getDestinationByName(name) {
-    return DESTINATIONS.find((element) => element.name === name);
+    return this._destinations.find((element) => element.name === name);
   }
 
   _destinationToggleHandler(evt) {
     evt.preventDefault();
     let optionFound = false;
-
     const datalist = evt.target.list;
     for (let j = 0; j < datalist.options.length; j++) {
       if (evt.target.value === datalist.options[j].value) {
@@ -308,6 +317,10 @@ export default class TripEditPoint extends SmartView {
         destination: null
       }, false);
     }
+  }
+
+  _getOffersForType(type) {
+    return this._availableOffers.find((element) => element.type === type.toLowerCase()).offers;
   }
 
   _priceChangeHandler(evt) {
@@ -330,13 +343,13 @@ export default class TripEditPoint extends SmartView {
   _offersSelectionChangedHandler(evt) {
     evt.preventDefault();
     if (evt.target.checked) {
-      this._data.offers.push(OFFERS.find((o) => o.id === evt.target.id));
+      this._data.offers.push(this._getOffersForType(this._data.type).find((o) => getOfferId(o.title) === evt.target.id));
       this.updateData({
         offers: this._data.offers
       }, true);
     } else {
       this.updateData({
-        offers: this._data.offers.filter((o) => o.id !== evt.target.id)
+        offers: this._data.offers.filter((o) => getOfferId(o.title) !== evt.target.id)
       }, true);
     }
   }
