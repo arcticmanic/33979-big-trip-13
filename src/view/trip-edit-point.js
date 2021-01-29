@@ -5,9 +5,7 @@ import flatpickr from "flatpickr";
 import "../../node_modules/flatpickr/dist/flatpickr.min.css";
 
 const createDestinationElementTemplate = (element) => {
-  return `
-    <option value="${element.name}"></option>
-  `;
+  return `<option value="${element.name}"></option>`;
 };
 
 const getOfferId = (title) => {
@@ -15,11 +13,10 @@ const getOfferId = (title) => {
 };
 
 const createOfferItemTemplate = (offer, isChecked, isDisabled) => {
-  const checkedAttribute = isChecked ? `checked` : ``;
+  const checkedString = isChecked ? `checked` : ``;
   const offerId = `${getOfferId(offer.title)}`;
-  return `
-    <div class="event__offer-selector">
-      <input class="event__offer-checkbox visually-hidden" id="${offerId}" type="checkbox" name="event-offer-${offerId}" ${checkedAttribute} ${isDisabled ? `disabled` : ``}>
+  return `<div class="event__offer-selector">
+      <input class="event__offer-checkbox  visually-hidden" id="${offerId}" type="checkbox" name="event-offer-${offerId}" ${checkedString} ${isDisabled ? `disabled` : ``}>
       <label class="event__offer-label" for="${offerId}">
         <span class="event__offer-title">${offer.title}</span>
         &plus;&euro;&nbsp;
@@ -33,26 +30,23 @@ const createOffersTemplate = (offers, selectedOffers, isDisabled) => {
   if (offers === null || offers.length === 0) {
     return ``;
   }
-  let offersMarkup = offers.map(
+  const offersMarkup = offers.map(
       (element) => createOfferItemTemplate(
           element,
           selectedOffers.some((selectedOffer) => selectedOffer.title === element.title && selectedOffer.price === element.price),
           isDisabled
       )).join(``);
-  return `
-      <section class="event__section  event__section--offers">
-        <h3 class="event__section-title  event__section-title--offers">Offers</h3>
-        <div class="event__available-offers">
-          ${offersMarkup}
-        </div>
-      </section>
+  return `<section class="event__section  event__section--offers">
+      <h3 class="event__section-title  event__section-title--offers">Offers</h3>
+      <div class="event__available-offers">
+        ${offersMarkup}
+      </div>
+    </section>
   `;
 };
 
 const createPhotoTemplate = (pic) => {
-  return `
-    <img class="event__photo" src="${pic.src}" alt="${pic.description}">
-  `;
+  return `<img class="event__photo" src="${pic.src}" alt="${pic.description}">`;
 };
 
 const createDestinationTemplate = (destination) => {
@@ -63,9 +57,8 @@ const createDestinationTemplate = (destination) => {
     return ``;
   }
   const photosMarkup = destination.pictures.map((element) => createPhotoTemplate(element)).join(``);
-  return `
-    <section class="event__section event__section--destination">
-      <h3 class="event__section-title event__section-title--destination">Destination</h3>
+  return `<section class="event__section  event__section--destination">
+      <h3 class="event__section-title  event__section-title--destination">Destination</h3>
       <p class="event__destination-description">${destination.description}</p>
       <div class="event__photos-container">
         <div class="event__photos-tape">
@@ -84,12 +77,12 @@ const createButtonsTemplate = (isNew, isDisabled, isSaving, isDeleting, destinat
     resetBtnText = isDeleting ? `Deleting...` : `Delete`;
   }
   const rollupBtnClass = isNew ? `visually-hidden` : `event__rollup-btn`;
-  return `
-    <button class="event__save-btn  btn  btn--blue" type="submit" ${destinationSelected && !isDisabled ? `` : `disabled`}>${isSaving ? `Saving...` : `Save`}</button>
+  return `<button class="event__save-btn  btn  btn--blue" type="submit" ${destinationSelected && !isDisabled ? `` : `disabled`}>${isSaving ? `Saving...` : `Save`}</button>
     <button class="event__reset-btn" type="reset" ${isDisabled ? `disabled` : ``}>${resetBtnText}</button>
     <button class="${rollupBtnClass}" type="button">
       <span class="visually-hidden">Open event</span>
-    </button>`;
+    </button>
+  `;
 };
 
 const createEditPointTemplate = (data, destinations, allOffers) => {
@@ -106,8 +99,7 @@ const createEditPointTemplate = (data, destinations, allOffers) => {
   const destinationSectionMarkup = createDestinationTemplate(destination);
   const buttonsMarkup = createButtonsTemplate(isNew, isDisabled, isSaving, isDeleting, destination !== null);
 
-  return `
-    <li class="trip-events__item">
+  return `<li class="trip-events__item">
       <form class="event event--edit" action="#" method="post">
         <header class="event__header">
           <div class="event__type-wrapper">
@@ -279,7 +271,7 @@ export default class TripEditPoint extends SmartView {
         isSaving: false,
       };
     }
-    let data = Object.assign(
+    const data = Object.assign(
         {},
         point,
         {
@@ -294,7 +286,7 @@ export default class TripEditPoint extends SmartView {
   }
 
   static parseDataToPoint(data) {
-    let point = Object.assign({}, data);
+    const point = Object.assign({}, data);
     if (point.isNew) {
       point.isFavorite = false;
     }
@@ -433,7 +425,7 @@ export default class TripEditPoint extends SmartView {
   }
 
   _startTimeChangeHandler([userDate]) {
-    let newDate = dayjs(userDate);
+    const newDate = dayjs(userDate);
     if (newDate.isAfter(this._data.endTime)) {
       this._data.endTime = newDate;
     }

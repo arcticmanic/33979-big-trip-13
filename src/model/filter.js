@@ -1,4 +1,3 @@
-
 import Observer from "../utils/observer.js";
 import {FilterType} from "../const.js";
 

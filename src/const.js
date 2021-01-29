@@ -1,3 +1,4 @@
+
 const SortType = {
   DEFAULT: `sort-day`,
   TIME: `sort-time`,

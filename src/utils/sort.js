@@ -20,6 +20,7 @@ const getTotalPrice = (point) => {
   point.offers.forEach((offer) => {
     cost += offer.price;
   });
+
   return cost;
 };
 

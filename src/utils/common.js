@@ -16,4 +16,8 @@ const capitalize = (s) => {
   return s[0].toUpperCase() + s.slice(1);
 };
 
-export {isDatesEqual, isDateInFuture, isDateInPast, capitalize};
+const isOnline = () => {
+  return window.navigator.onLine;
+};
+
+export {isDatesEqual, isDateInFuture, isDateInPast, capitalize, isOnline};

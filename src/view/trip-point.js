@@ -1,33 +1,34 @@
 import dayjs from "dayjs";
 import AbstractView from "./abstract.js";
-import {toFormattedString} from "../utils.js";
 
 const MINUTES_PER_HOUR = 60;
 const MINUTES_PER_DAY = 1440;
 
+const zeroPad = (num, places) => String(num).padStart(places, `0`);
+
 const getEventDuration = (startTime, endTime) => {
   const durationInMinutes = endTime.diff(startTime, `minute`);
   if (durationInMinutes < MINUTES_PER_HOUR) {
-    return `${toFormattedString(durationInMinutes, 2)}M`;
+    return `${zeroPad(durationInMinutes, 2)}M`;
   } else if (durationInMinutes < MINUTES_PER_DAY) {
     const hours = Math.floor(durationInMinutes / MINUTES_PER_HOUR);
     const minutes = durationInMinutes % MINUTES_PER_HOUR;
-    return `${toFormattedString(hours, 2)}H ${toFormattedString(minutes, 2)}M`;
+    return `${zeroPad(hours, 2)}H ${zeroPad(minutes, 2)}M`;
   } else {
     const days = Math.floor(durationInMinutes / MINUTES_PER_DAY);
     const hours = Math.floor((durationInMinutes - days * MINUTES_PER_DAY) / MINUTES_PER_HOUR);
     const minutes = durationInMinutes - days * MINUTES_PER_DAY - hours * MINUTES_PER_HOUR;
-    return `${toFormattedString(days, 2)}D ${toFormattedString(hours, 2)}H ${toFormattedString(minutes, 2)}M`;
+    return `${zeroPad(days, 2)}D ${zeroPad(hours, 2)}H ${zeroPad(minutes, 2)}M`;
   }
 };
 
 const createOfferTemplate = (offer) => {
-  return `
-  <li class="event__offer">
+  return `<li class="event__offer">
     <span class="event__offer-title">${offer.title}</span>
-    &plus;&nbsp;&euro;&nbsp;
+    &plus;&euro;&nbsp;
     <span class="event__offer-price">${offer.price}</span>
-  </li>`;
+  </li>
+  `;
 };
 
 const createTripPointTemplate = (point) => {
@@ -37,14 +38,16 @@ const createTripPointTemplate = (point) => {
   const eventStartTime = dayjs(startTime).format(`HH:mm`);
   const eventEndTime = dayjs(endTime).format(`HH:mm`);
 
+  let offersMarkup = ``;
+  offers.forEach((element) => {
+    offersMarkup += createOfferTemplate(element);
+  });
+
   const favoriteBtnClass = isFavorite ?
     `event__favorite-btn event__favorite-btn--active` :
     `event__favorite-btn`;
 
-  const createOffersTemplate = () => offers.map((element) => createOfferTemplate(element)).join(``);
-
-  return `
-    <li class="trip-events__item">
+  return `<li class="trip-events__item">
       <div class="event">
         <time class="event__date" datetime="${startTime.toISOString()}">${date}</time>
         <div class="event__type">
@@ -64,7 +67,7 @@ const createTripPointTemplate = (point) => {
         </p>
         <h4 class="visually-hidden">Offers:</h4>
         <ul class="event__selected-offers">
-          ${createOffersTemplate()}
+          ${offersMarkup}
         </ul>
         <button class="${favoriteBtnClass}" type="button">
           <span class="visually-hidden">Add to favorite</span>

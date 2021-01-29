@@ -1,16 +1,15 @@
 import AbstractView from "./abstract.js";
 import {MenuItem} from "../const.js";
 
-const createTripMenuTemplate = () => {
-  return `
-    <nav class="trip-controls__trip-tabs trip-tabs">
-      <a class="trip-tabs__btn trip-tabs__btn--active" data-menu-item="${MenuItem.TABLE}" href="#">Table</a>
+const createSiteMenuTemplate = () => {
+  return `<nav class="trip-controls__trip-tabs  trip-tabs">
+      <a class="trip-tabs__btn  trip-tabs__btn--active" data-menu-item="${MenuItem.TABLE}" href="#">Table</a>
       <a class="trip-tabs__btn" data-menu-item="${MenuItem.STATS}" href="#">Stats</a>
     </nav>
   `;
 };
 
-export default class TripMenu extends AbstractView {
+export default class SiteMenu extends AbstractView {
   constructor() {
     super();
     this._activeItem = MenuItem.TABLE;
@@ -18,7 +17,7 @@ export default class TripMenu extends AbstractView {
   }
 
   getTemplate() {
-    return createTripMenuTemplate();
+    return createSiteMenuTemplate();
   }
 
   _menuClickHandler(evt) {

@@ -2,8 +2,7 @@ import AbstractView from "./abstract.js";
 import {SortType} from "../const.js";
 
 const createTripSortTemplate = () => {
-  return `
-    <form class="trip-events__trip-sort trip-sort" action="#" method="get">
+  return `<form class="trip-events__trip-sort trip-sort" action="#" method="get">
       <div class="trip-sort__item trip-sort__item--day">
         <input id="sort-day" class="trip-sort__input visually-hidden" type="radio" name="trip-sort" value="${SortType.DEFAULT}" checked>
         <label class="trip-sort__btn" for="sort-day">Day</label>
@@ -17,7 +16,7 @@ const createTripSortTemplate = () => {
         <label class="trip-sort__btn" for="sort-time">Time</label>
       </div>
       <div class="trip-sort__item trip-sort__item--price">
-        <input id="sort-price" class="trip-sort__input visually-hidden" type="radio" name="trip-sort" value="${SortType.PRICE}" checked>
+        <input id="sort-price" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="${SortType.PRICE}">
         <label class="trip-sort__btn" for="sort-price">Price</label>
       </div>
       <div class="trip-sort__item trip-sort__item--offer">

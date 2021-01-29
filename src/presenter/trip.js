@@ -1,4 +1,4 @@
-import TripMenuView from "../view/trip-menu.js";
+import SiteMenuView from "../view/site-menu.js";
 import TripInfoView from "../view/trip-info.js";
 import TripSortView from "../view/trip-sort.js";
 import TripListView from "../view/trip-list.js";
@@ -9,10 +9,12 @@ import LoadingView from "../view/loading.js";
 import LoadingErrorView from "../view/loading-error.js";
 import PointPresenter, {State as PointPresenterViewState} from "./point.js";
 import NewPointPresenter from "./new-point.js";
-import {remove, render, RenderPosition} from "../utils/render.js";
 import {FilterType, SortType, UpdateType, UserAction, MenuItem} from "../const.js";
+import {remove, render, RenderPosition} from "../utils/render.js";
 import {sortByDate, sortByTime, sortByPrice} from "../utils/sort.js";
 import {filter} from "../utils/filter.js";
+import {isOnline} from "../utils/common.js";
+import {toast} from "../utils/toast/toast.js";
 
 const tripEventsContainer = document.querySelector(`.trip-events`);
 const tripMenuContainer = document.querySelector(`.trip-main__trip-controls`);
@@ -30,28 +32,30 @@ export default class Trip {
     this._isDestinationsLoading = true;
     this._isOffersLoading = true;
     this._api = api;
+
     this._listEmptyComponent = new ListEmptyView();
     this._tripSortComponent = new TripSortView();
     this._tripListComponent = new TripListView();
     this._newButtonComponent = new NewButtonView();
     this._loadingComponent = new LoadingView();
     this._loadingErrorComponent = new LoadingErrorView();
+
     this._handleViewAction = this._handleViewAction.bind(this);
     this._handleModelEvent = this._handleModelEvent.bind(this);
-    this._modeChangeHandler = this._modeChangeHandler.bind(this);
-    this._sortTypeChangeHandler = this._sortTypeChangeHandler.bind(this);
+    this._handleModeChange = this._handleModeChange.bind(this);
+    this._handleSortTypeChange = this._handleSortTypeChange.bind(this);
     this._handleNewButtonClick = this._handleNewButtonClick.bind(this);
-    this._handleTripMenuClick = this._handleTripMenuClick.bind(this);
+    this._handleSiteMenuClick = this._handleSiteMenuClick.bind(this);
 
     this._newPointPresenter = new NewPointPresenter(this._tripListComponent, this._handleViewAction);
   }
 
   init() {
     this._tripInfoComponent = new TripInfoView(this._getPoints());
-    this._tripMenuComponent = new TripMenuView();
+    this._siteMenuComponent = new SiteMenuView();
     this._statsComponent = new StatisticsView(this._pointsModel.getPoints());
     this._newButtonComponent.setNewButtonClickHandler(this._handleNewButtonClick);
-    this._tripMenuComponent.setMenuClickHandler(this._handleTripMenuClick);
+    this._siteMenuComponent.setMenuClickHandler(this._handleSiteMenuClick);
 
     this._pointsModel.addObserver(this._handleModelEvent);
     this._destinationsModel.addObserver(this._handleModelEvent);
@@ -87,8 +91,8 @@ export default class Trip {
     return filteredPoints;
   }
 
-  _renderTripMenu() {
-    render(tripMenuContainer, this._tripMenuComponent, RenderPosition.AFTERBEGIN);
+  _renderSiteMenu() {
+    render(tripMenuContainer, this._siteMenuComponent, RenderPosition.AFTERBEGIN);
   }
 
   _renderNewButton() {
@@ -110,7 +114,7 @@ export default class Trip {
     }
 
     this._tripSortComponent = new TripSortView();
-    this._tripSortComponent.setSortTypeChangeHandler(this._sortTypeChangeHandler);
+    this._tripSortComponent.setSortTypeChangeHandler(this._handleSortTypeChange);
     render(tripEventsContainer, this._tripSortComponent, RenderPosition.AFTERBEGIN);
   }
 
@@ -119,7 +123,7 @@ export default class Trip {
   }
 
   _renderPoint(point) {
-    const pointPresenter = new PointPresenter(this._tripListComponent, this._handleViewAction, this._modeChangeHandler);
+    const pointPresenter = new PointPresenter(this._tripListComponent, this._handleViewAction, this._handleModeChange);
     pointPresenter.init(point, this._destinationsModel, this._offersModel);
     this._pointPresenter[point.id] = pointPresenter;
   }
@@ -128,16 +132,16 @@ export default class Trip {
     this._getPoints().forEach((point) => this._renderPoint(point));
   }
 
+  _renderListEmpty() {
+    render(tripEventsContainer, this._listEmptyComponent, RenderPosition.AFTERBEGIN);
+  }
+
   _renderLoading() {
     render(tripEventsContainer, this._loadingComponent, RenderPosition.AFTERBEGIN);
   }
 
   _renderLoadingError() {
     render(tripEventsContainer, this._loadingErrorComponent, RenderPosition.AFTERBEGIN);
-  }
-
-  _renderListEmpty() {
-    render(tripEventsContainer, this._listEmptyComponent, RenderPosition.AFTERBEGIN);
   }
 
   _renderTrip() {
@@ -154,7 +158,7 @@ export default class Trip {
       return;
     }
 
-    this._renderTripMenu();
+    this._renderSiteMenu();
     this._renderNewButton();
 
     if (this._getPoints().length === 0) {
@@ -181,7 +185,7 @@ export default class Trip {
   _clearTrip() {
     this._newPointPresenter.destroy();
     this._clearPointsList();
-    remove(this._tripMenuComponent);
+    remove(this._siteMenuComponent);
     remove(this._tripInfoComponent);
     remove(this._tripSortComponent);
     remove(this._tripListComponent);
@@ -195,33 +199,32 @@ export default class Trip {
         this._api.updatePoint(update)
           .then((response) => {
             this._pointsModel.updatePoint(updateType, response);
-          }).catch(() => {
+          })
+          .catch(() => {
             this._pointPresenter[update.id].setViewState(PointPresenterViewState.ABORTING);
           });
         break;
       case UserAction.ADD_POINT:
         this._newPointPresenter.setSaving();
-        this._api.addPoint(update)
-          .then((response) => {
-            this._pointsModel.addPoint(updateType, response);
-            this._newButtonComponent.getElement().disabled = false;
-          })
-          .catch(() => {
-            this._newPointPresenter.setAborting();
-          });
+        this._api.addPoint(update).then((response) => {
+          this._pointsModel.addPoint(updateType, response);
+          this._newButtonComponent.getElement().disabled = false;
+        })
+        .catch(() => {
+          this._newPointPresenter.setAborting();
+        });
         break;
       case UserAction.DELETE_POINT:
         this._pointPresenter[update.id].setViewState(PointPresenterViewState.DELETING);
         this._newButtonComponent.getElement().disabled = true;
-        this._api.deletePoint(update)
-          .then(() => {
-            this._pointsModel.deletePoint(updateType, update);
-            this._newButtonComponent.getElement().disabled = false;
-          })
-          .catch(() => {
-            this._pointPresenter[update.id].setViewState(PointPresenterViewState.ABORTING);
-            this._newButtonComponent.getElement().disabled = false;
-          });
+        this._api.deletePoint(update).then(() => {
+          this._pointsModel.deletePoint(updateType, update);
+          this._newButtonComponent.getElement().disabled = false;
+        })
+        .catch(() => {
+          this._pointPresenter[update.id].setViewState(PointPresenterViewState.ABORTING);
+          this._newButtonComponent.getElement().disabled = false;
+        });
         break;
       case UserAction.CANCEL_ADD_POINT:
         this._newButtonComponent.getElement().disabled = false;
@@ -261,14 +264,14 @@ export default class Trip {
     }
   }
 
-  _modeChangeHandler() {
+  _handleModeChange() {
     this._newPointPresenter.destroy();
     Object
       .values(this._pointPresenter)
       .forEach((presenter) => presenter.resetView());
   }
 
-  _sortTypeChangeHandler(sortType) {
+  _handleSortTypeChange(sortType) {
     if (this._currentSortType === sortType) {
       return;
     }
@@ -278,27 +281,32 @@ export default class Trip {
   }
 
   _handleNewButtonClick() {
+    if (!isOnline()) {
+      toast(`You can't create new point offline`);
+      return;
+    }
+
     this._currentSortType = SortType.DEFAULT;
     this._filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
-    if (this._tripMenuComponent.getActiveMenuItem() === MenuItem.STATS) {
-      this._handleTripMenuClick(MenuItem.TABLE);
+    if (this._siteMenuComponent.getActiveMenuItem() === MenuItem.STATS) {
+      this._handleSiteMenuClick(MenuItem.TABLE);
     }
     this._newButtonComponent.getElement().disabled = true;
     remove(this._listEmptyComponent);
     this._newPointPresenter.init(this._destinationsModel, this._offersModel);
   }
 
-  _handleTripMenuClick(menuItem) {
+  _handleSiteMenuClick(menuItem) {
     switch (menuItem) {
       case MenuItem.TABLE:
         remove(this._statsComponent);
-        this._tripMenuComponent.setMenuItem(MenuItem.TABLE);
+        this._siteMenuComponent.setMenuItem(MenuItem.TABLE);
         this._clearTrip();
         this.init();
         this._renderTrip();
         break;
       case MenuItem.STATS:
-        this._tripMenuComponent.setMenuItem(MenuItem.STATS);
+        this._siteMenuComponent.setMenuItem(MenuItem.STATS);
         this.destroy();
         this._statsComponent = new StatisticsView(this._pointsModel.getPoints());
         render(tripEventsContainer, this._statsComponent, RenderPosition.BEFOREEND);
