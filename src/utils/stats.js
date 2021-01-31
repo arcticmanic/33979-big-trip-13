@@ -1,5 +1,7 @@
 import {POINT_TYPES} from "../const.js";
 
+const MINUTES_PER_DAY = 1440;
+
 const getChartLabels = (points) => {
   const counts = calculateCountByPointType(points);
   const labels = [];
@@ -39,8 +41,9 @@ const calculateTimeByPointType = (points) => {
     const durationInMinutes = point.endTime.diff(point.startTime, `minute`);
     times.set(point.type, times.get(point.type) + durationInMinutes);
   });
-
-  return times;
+  const timesInDays = new Map();
+  times.forEach((_, key) => timesInDays.set(key, Math.round(times.get(key) / MINUTES_PER_DAY)));
+  return timesInDays;
 };
 
 export {getChartLabels, calculateCostByPointType, calculateCountByPointType, calculateTimeByPointType};
