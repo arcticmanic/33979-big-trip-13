@@ -1,8 +1,14 @@
+import {POINT_TYPES} from "../const.js";
 import dayjs from "dayjs";
 import he from "he";
 import SmartView from "./smart.js";
 import flatpickr from "flatpickr";
 import "../../node_modules/flatpickr/dist/flatpickr.min.css";
+
+const DATETIME_FORMAT = `DD/MM/YY HH:mm`;
+const DEFAULT_POINT_TYPE = `flight`;
+const DATEPICKER_FORMAT = `d/m/y H:i`;
+const DATEPICKER_DEFAULT_DATE = `today`;
 
 const createDestinationElementTemplate = (element) => {
   return `<option value="${element.name}"></option>`;
@@ -10,6 +16,16 @@ const createDestinationElementTemplate = (element) => {
 
 const getOfferId = (title) => {
   return title.split(` `).join(`-`);
+};
+
+const createEventTypeItemTemplate = (itemType, currentPointType) => {
+  const isChecked = itemType.toLowerCase() === currentPointType.toLowerCase() ? `checked` : ``;
+  const type = itemType.toLowerCase();
+  return `<div class="event__type-item">
+    <input id="event-type-${type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" ${isChecked}>
+    <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-1">${itemType}</label>
+  </div>
+  `;
 };
 
 const createOfferItemTemplate = (offer, isChecked, isDisabled) => {
@@ -90,14 +106,15 @@ const createEditPointTemplate = (data, destinations, allOffers) => {
 
   const destinationName = destination === null ? `` : destination.name;
 
-  const eventStartTime = startTime === null ? `` : dayjs(startTime).format(`DD/MM/YY HH:mm`);
-  const eventEndTime = endTime === null ? `` : dayjs(endTime).format(`DD/MM/YY HH:mm`);
+  const eventStartTime = startTime === null ? `` : dayjs(startTime).format(DATETIME_FORMAT);
+  const eventEndTime = endTime === null ? `` : dayjs(endTime).format(DATETIME_FORMAT);
 
   const destinationsMarkup = destinations.map((element) => createDestinationElementTemplate(element)).join(``);
   const availableOffers = allOffers.find((element) => element.type === type.toLowerCase()).offers;
   const offersSectionMarkup = createOffersTemplate(availableOffers, offers, isDisabled);
   const destinationSectionMarkup = createDestinationTemplate(destination);
   const buttonsMarkup = createButtonsTemplate(isNew, isDisabled, isSaving, isDeleting, destination !== null);
+  const eventTypeItemsMarkup = POINT_TYPES.reduce((acc, currentValue) => acc + createEventTypeItemTemplate(currentValue, type), ``);
 
   return `<li class="trip-events__item">
       <form class="event event--edit" action="#" method="post">
@@ -107,50 +124,11 @@ const createEditPointTemplate = (data, destinations, allOffers) => {
               <span class="visually-hidden">Choose event type</span>
               <img class="event__type-icon" width="17" height="17" src="img/icons/${type.toLowerCase()}.png" alt="Event type icon">
             </label>
-            <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox" value="${type}" ${isDisabled ? `disabled` : ``}>
+            <input class="event__type-toggle visually-hidden" id="event-type-toggle-1" type="checkbox" value="${type}" ${isDisabled ? `disabled` : ``}>
             <div class="event__type-list">
               <fieldset class="event__type-group">
                 <legend class="visually-hidden">Event type</legend>
-                <div class="event__type-item">
-                  <input id="event-type-taxi-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="taxi">
-                  <label class="event__type-label  event__type-label--taxi" for="event-type-taxi-1">Taxi</label>
-                </div>
-                <div class="event__type-item">
-                  <input id="event-type-bus-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="bus">
-                  <label class="event__type-label  event__type-label--bus" for="event-type-bus-1">Bus</label>
-                </div>
-                <div class="event__type-item">
-                  <input id="event-type-train-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="train">
-                  <label class="event__type-label  event__type-label--train" for="event-type-train-1">Train</label>
-                </div>
-                <div class="event__type-item">
-                  <input id="event-type-ship-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="ship">
-                  <label class="event__type-label  event__type-label--ship" for="event-type-ship-1">Ship</label>
-                </div>
-                <div class="event__type-item">
-                  <input id="event-type-transport-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="transport">
-                  <label class="event__type-label  event__type-label--transport" for="event-type-transport-1">Transport</label>
-                </div>
-                <div class="event__type-item">
-                  <input id="event-type-drive-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="drive">
-                  <label class="event__type-label  event__type-label--drive" for="event-type-drive-1">Drive</label>
-                </div>
-                <div class="event__type-item">
-                  <input id="event-type-flight-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="flight">
-                  <label class="event__type-label  event__type-label--flight" for="event-type-flight-1">Flight</label>
-                </div>
-                <div class="event__type-item">
-                  <input id="event-type-check-in-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="check-in">
-                  <label class="event__type-label  event__type-label--check-in" for="event-type-check-in-1">Check-in</label>
-                </div>
-                <div class="event__type-item">
-                  <input id="event-type-sightseeing-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="sightseeing">
-                  <label class="event__type-label  event__type-label--sightseeing" for="event-type-sightseeing-1">Sightseeing</label>
-                </div>
-                <div class="event__type-item">
-                  <input id="event-type-restaurant-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="restaurant">
-                  <label class="event__type-label  event__type-label--restaurant" for="event-type-restaurant-1">Restaurant</label>
-                </div>
+                ${eventTypeItemsMarkup}
               </fieldset>
             </div>
           </div>
@@ -260,7 +238,7 @@ export default class TripEditPoint extends SmartView {
   static parsePointToData(point) {
     if (point === null) {
       return {
-        type: `flight`,
+        type: DEFAULT_POINT_TYPE,
         destination: null,
         price: 0,
         startTime: dayjs(),
@@ -338,7 +316,7 @@ export default class TripEditPoint extends SmartView {
     if (!evt.target.validity.valid) {
       this.updateData({
         price: 0
-      }, false);
+      }, true);
     } else {
       let priceStr = evt.target.value;
       if (priceStr === ``) {
@@ -346,7 +324,7 @@ export default class TripEditPoint extends SmartView {
       }
       this.updateData({
         price: parseInt(priceStr, 10)
-      }, false);
+      }, true);
     }
   }
 
@@ -406,18 +384,18 @@ export default class TripEditPoint extends SmartView {
     this._datepickerStart = flatpickr(
         this.getElement().querySelector(`#event-start-time-1`),
         {
-          dateFormat: `d/m/y H:i`,
+          dateFormat: DATEPICKER_FORMAT,
           enableTime: true,
-          default: `today`,
+          default: DATEPICKER_DEFAULT_DATE,
           onChange: this._startTimeChangeHandler
         }
     );
     this._datepickerEnd = flatpickr(
         this.getElement().querySelector(`#event-end-time-1`),
         {
-          dateFormat: `d/m/y H:i`,
+          dateFormat: DATEPICKER_FORMAT,
           enableTime: true,
-          default: `today`,
+          default: DATEPICKER_DEFAULT_DATE,
           minDate: this._data.startTime.toDate(),
           onChange: this._endTimeChangeHandler
         }

@@ -7,8 +7,8 @@ const getSyncedPoints = (items) => {
 };
 
 const createStoreStructure = (items) => {
-  return items.reduce((acc, current) => {
-    return Object.assign({}, acc, {
+  return items.reduce((accumulator, current) => {
+    return Object.assign({}, accumulator, {
       [current.id]: current,
     });
   }, {});

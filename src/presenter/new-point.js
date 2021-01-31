@@ -63,7 +63,7 @@ export default class NewPoint {
   _handleFormSubmit(point) {
     this._changeData(
         UserAction.ADD_POINT,
-        UpdateType.MAJOR,
+        UpdateType.MEDIUM,
         point
     );
   }
@@ -71,7 +71,7 @@ export default class NewPoint {
   _handleCancelClick() {
     this._changeData(
         UserAction.CANCEL_ADD_POINT,
-        UpdateType.MAJOR,
+        UpdateType.MEDIUM,
         null
     );
     this.destroy();
@@ -82,7 +82,7 @@ export default class NewPoint {
       evt.preventDefault();
       this._changeData(
           UserAction.CANCEL_ADD_POINT,
-          UpdateType.MAJOR,
+          UpdateType.MEDIUM,
           null
       );
       this.destroy();
