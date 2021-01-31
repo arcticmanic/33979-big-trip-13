@@ -173,15 +173,15 @@ export default class Point {
       return;
     }
 
-    const isMajorUpdate =
-      !isDatesEqual(this._point.startTime, update.startTime) ||
-      this._point.price !== update.price ||
-      this._point.destination.name !== update.destination.name ||
-      !this._isOffersEqual(this._point.offers, update.offers);
+    const isMinorUpdate =
+      isDatesEqual(this._point.startTime, update.startTime) &&
+      this._point.price === update.price &&
+      this._point.destination.name === update.destination.name &&
+      this._isOffersEqual(this._point.offers, update.offers);
 
     this._changeData(
         UserAction.UPDATE_POINT,
-        isMajorUpdate ? UpdateType.MAJOR : UpdateType.PATCH,
+        isMinorUpdate ? UpdateType.MINOR : UpdateType.MEDIUM,
         update
     );
   }
