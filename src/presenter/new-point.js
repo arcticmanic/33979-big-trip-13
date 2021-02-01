@@ -34,7 +34,11 @@ export default class NewPoint {
     if (this._pointEditComponent === null) {
       return;
     }
-
+    this._changeData(
+        UserAction.CANCEL_ADD_POINT,
+        UpdateType.MEDIUM,
+        null
+    );
     remove(this._pointEditComponent);
     this._pointEditComponent = null;
 
@@ -69,22 +73,12 @@ export default class NewPoint {
   }
 
   _handleCancelClick() {
-    this._changeData(
-        UserAction.CANCEL_ADD_POINT,
-        UpdateType.MEDIUM,
-        null
-    );
     this.destroy();
   }
 
   _escKeyDownHandler(evt) {
     if (evt.key === `Escape` || evt.key === `Esc`) {
       evt.preventDefault();
-      this._changeData(
-          UserAction.CANCEL_ADD_POINT,
-          UpdateType.MEDIUM,
-          null
-      );
       this.destroy();
     }
   }

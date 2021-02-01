@@ -23,7 +23,7 @@ const createEventTypeItemTemplate = (itemType, currentPointType) => {
   const type = itemType.toLowerCase();
   return `<div class="event__type-item">
     <input id="event-type-${type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" ${isChecked}>
-    <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-1">${itemType}</label>
+    <label class="event__type-label event__type-label--${type}" for="event-type-${type}-1">${itemType}</label>
   </div>
   `;
 };
@@ -32,7 +32,7 @@ const createOfferItemTemplate = (offer, isChecked, isDisabled) => {
   const checkedString = isChecked ? `checked` : ``;
   const offerId = `${getOfferId(offer.title)}`;
   return `<div class="event__offer-selector">
-      <input class="event__offer-checkbox  visually-hidden" id="${offerId}" type="checkbox" name="event-offer-${offerId}" ${checkedString} ${isDisabled ? `disabled` : ``}>
+      <input class="event__offer-checkbox visually-hidden" id="${offerId}" type="checkbox" name="event-offer-${offerId}" ${checkedString} ${isDisabled ? `disabled` : ``}>
       <label class="event__offer-label" for="${offerId}">
         <span class="event__offer-title">${offer.title}</span>
         &plus;&euro;&nbsp;
@@ -52,8 +52,8 @@ const createOffersTemplate = (offers, selectedOffers, isDisabled) => {
           selectedOffers.some((selectedOffer) => selectedOffer.title === element.title && selectedOffer.price === element.price),
           isDisabled
       )).join(``);
-  return `<section class="event__section  event__section--offers">
-      <h3 class="event__section-title  event__section-title--offers">Offers</h3>
+  return `<section class="event__section event__section--offers">
+      <h3 class="event__section-title event__section-title--offers">Offers</h3>
       <div class="event__available-offers">
         ${offersMarkup}
       </div>
@@ -73,8 +73,8 @@ const createDestinationTemplate = (destination) => {
     return ``;
   }
   const photosMarkup = destination.pictures.map((element) => createPhotoTemplate(element)).join(``);
-  return `<section class="event__section  event__section--destination">
-      <h3 class="event__section-title  event__section-title--destination">Destination</h3>
+  return `<section class="event__section event__section--destination">
+      <h3 class="event__section-title event__section-title--destination">Destination</h3>
       <p class="event__destination-description">${destination.description}</p>
       <div class="event__photos-container">
         <div class="event__photos-tape">
@@ -93,7 +93,7 @@ const createButtonsTemplate = (isNew, isDisabled, isSaving, isDeleting, destinat
     resetBtnText = isDeleting ? `Deleting...` : `Delete`;
   }
   const rollupBtnClass = isNew ? `visually-hidden` : `event__rollup-btn`;
-  return `<button class="event__save-btn  btn  btn--blue" type="submit" ${destinationSelected && !isDisabled ? `` : `disabled`}>${isSaving ? `Saving...` : `Save`}</button>
+  return `<button class="event__save-btn btn btn--blue" type="submit" ${destinationSelected && !isDisabled ? `` : `disabled`}>${isSaving ? `Saving...` : `Save`}</button>
     <button class="event__reset-btn" type="reset" ${isDisabled ? `disabled` : ``}>${resetBtnText}</button>
     <button class="${rollupBtnClass}" type="button">
       <span class="visually-hidden">Open event</span>
@@ -120,7 +120,7 @@ const createEditPointTemplate = (data, destinations, allOffers) => {
       <form class="event event--edit" action="#" method="post">
         <header class="event__header">
           <div class="event__type-wrapper">
-            <label class="event__type  event__type-btn" for="event-type-toggle-1">
+            <label class="event__type event__type-btn" for="event-type-toggle-1">
               <span class="visually-hidden">Choose event type</span>
               <img class="event__type-icon" width="17" height="17" src="img/icons/${type.toLowerCase()}.png" alt="Event type icon">
             </label>
@@ -132,28 +132,28 @@ const createEditPointTemplate = (data, destinations, allOffers) => {
               </fieldset>
             </div>
           </div>
-          <div class="event__field-group  event__field-group--destination">
-            <label class="event__label  event__type-output" for="event-destination-1">
+          <div class="event__field-group event__field-group--destination">
+            <label class="event__label event__type-output" for="event-destination-1">
               ${type}
             </label>
-            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${he.encode(destinationName)}" list="destination-list-1" ${isDisabled ? `disabled` : ``}>
+            <input class="event__input event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${he.encode(destinationName)}" list="destination-list-1" ${isDisabled ? `disabled` : ``}>
             <datalist id="destination-list-1">
               ${destinationsMarkup}
             </datalist>
           </div>
-          <div class="event__field-group  event__field-group--time">
+          <div class="event__field-group event__field-group--time">
             <label class="visually-hidden" for="event-start-time-1">From</label>
-            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${eventStartTime}" ${isDisabled ? `disabled` : ``}>
+            <input class="event__input event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${eventStartTime}" ${isDisabled ? `disabled` : ``}>
             &mdash;
             <label class="visually-hidden" for="event-end-time-1">To</label>
-            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${eventEndTime}" ${isDisabled ? `disabled` : ``}>
+            <input class="event__input event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${eventEndTime}" ${isDisabled ? `disabled` : ``}>
           </div>
-          <div class="event__field-group  event__field-group--price">
+          <div class="event__field-group event__field-group--price">
             <label class="event__label" for="event-price-1">
               <span class="visually-hidden">Price</span>
               &euro;
             </label>
-            <input class="event__input  event__input--price" id="event-price-1" type="text" pattern="[0-9]+" title="Integer number" name="event-price" value="${he.encode(price.toString())}" ${isDisabled ? `disabled` : ``}>
+            <input class="event__input event__input--price" id="event-price-1" type="text" pattern="[0-9]+" title="Integer number" name="event-price" value="${he.encode(price.toString())}" ${isDisabled ? `disabled` : ``}>
           </div>
           ${buttonsMarkup}
         </header>
